@@ -1,0 +1,44 @@
+service:
+  name: talkyjs-alexa-skill
+  
+custom:
+  stage:  ${opt:stage, self:provider.stage}
+  #serverless-layers:
+  #  layersDeploymentBucket: YOUR_S3_BUCKET_NAME
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+  - serverless-layers
+  - serverless-prune-plugin
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  logRetentionInDays: 14
+  #region: us-east-1
+  stage: development
+  #deploymentBucket: YOUR_S3_BUCKET_NAME
+  environment:
+    STAGE: ${self:custom.stage}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+        - "s3:GetObject"
+        - "s3:DeleteObject"
+      Resource: 
+        - "arn:aws:s3:::*/*"
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:*"
+      Resource:
+        - "arn:aws:dynamodb:*:*:table/*"
+
+functions:
+  PomodoroTimer:
+    handler: src/index.handler
+    events:
+      # Test
+      - alexaSkill: amzn1.ask.skill.987654321
+      - alexaSkill
